@@ -6,6 +6,7 @@ Twisted Hue.
 """
 
 import json
+from twisted.internet import defer
 
 class _API(object):
     """
@@ -35,10 +36,24 @@ class _API(object):
 
 
     def request(self, method, endpoint, data=None):
+        """
+        Make a request to the Hue bridge.
+
+        @param method: The HTTP request method.
+        @type method: C{bytes}
+
+        @param endpoint: The API endpoint. Note that, if not empty, it must
+        start with a slash (C{/}). The Hue API consistently uses endpoints
+        prefixed with slashes in API responses, schedules and rules.
+        """
         url = self.baseURL + 'api'
         if endpoint or method == 'GET':
             url = '{url}/{username}'.format(url=url, username=self.username)
         if endpoint:
+            if not endpoint.startswith('/'):
+                return defer.fail(
+                    ValueError("Endpoint {0!r} does not start with a slash"
+                                   .format(endpoint)))
             url += endpoint
 
         if data is not None:

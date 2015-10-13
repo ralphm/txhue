@@ -60,6 +60,19 @@ class APITest(unittest.TestCase):
         return d
 
 
+    def test_getWithoutSlash(self):
+        """
+        Non-empty endpoints without a slash are not valid.
+        """
+        def checkException(exc):
+            self.assertEquals("Endpoint 'lights' does not start with a slash",
+                              str(exc))
+
+        d = self.assertFailure(self.api.get(b'lights'), ValueError)
+        d.addCallback(checkException)
+        return d
+
+
     def test_getFullState(self):
         responseData = {u'1': {u'name': u'Bedroom'},
                         u'2': {u'name': u'Kitchen'}}
@@ -172,13 +185,3 @@ class APITest(unittest.TestCase):
         self.assertIdentical(None, self.treq.kwargs['data'])
         d.callback(responseData)
         return d
-
-
-
-class BridgeTest(unittest.TestCase):
-    """
-    Tests for L{txhue.Bridge}.
-    """
-
-    def setUp(self):
-        self.bridge = txhue.Bridge()
